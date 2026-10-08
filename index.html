@@ -1,0 +1,799 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101b2d">
+  <title>Puesto Uno | Centro de operaciones</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color: #e9eef7;
+      background: #0b1321;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --sidebar: #101b2d;
+      --surface: #142137;
+      --surface-raised: #192943;
+      --border: rgba(190, 207, 231, .12);
+      --muted: #91a0b7;
+      --accent: #55d6a0;
+      --accent-soft: rgba(85, 214, 160, .13);
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; min-height: 100vh; }
+    button, a { font: inherit; }
+    button:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 252px minmax(0, 1fr);
+      height: 100vh;
+      min-height: 100vh;
+    }
+
+    .app.logistics-open { grid-template-columns: minmax(0, 1fr); }
+    .app.logistics-open .sidebar { display: none; }
+    .app.logistics-open .topbar { min-height: 58px; padding: 8px 20px; }
+    .app.logistics-open .content { padding: 0; }
+    .app.logistics-open .frame-shell { border: 0; border-radius: 0; }
+    .app.logistics-open .frame-toolbar { min-height: 36px; }
+
+    .sidebar {
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 26px 16px 18px;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 10px;
+      margin-bottom: 38px;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 46px;
+      height: 46px;
+      flex: 0 0 auto;
+      place-items: center;
+      color: #092118;
+      background: linear-gradient(145deg, #8af0c2, #35bd8b);
+      border: 1px solid rgba(199, 255, 228, .55);
+      border-radius: 15px;
+      box-shadow: 0 8px 24px rgba(53, 189, 139, .2), inset 0 1px 0 rgba(255,255,255,.55);
+      transition: transform .24s ease, box-shadow .24s ease;
+    }
+
+    .brand:hover .brand-mark { transform: translateY(-2px) rotate(-4deg); box-shadow: 0 12px 28px rgba(53, 189, 139, .3); }
+    .brand-mark svg { display: block; width: 30px; height: 30px; }
+    .brand-name { margin: 0; font-size: 16px; font-weight: 750; letter-spacing: .09em; }
+    .brand-caption { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+    .section-label {
+      margin: 0 10px 10px;
+      color: #7e8ca3;
+      font-size: 10px;
+      font-weight: 750;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+
+    .nav-list { display: grid; gap: 6px; }
+    .nav-item {
+      display: flex;
+      width: 100%;
+      min-height: 46px;
+      align-items: center;
+      gap: 12px;
+      padding: 0 12px;
+      color: #aab6c8;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+    }
+
+    .nav-item:hover { color: #fff; background: rgba(255,255,255,.055); transform: translateX(3px); }
+    .nav-item[aria-current="page"] {
+      color: #eafff5;
+      background: var(--accent-soft);
+      border-color: rgba(85, 214, 160, .16);
+      box-shadow: inset 3px 0 var(--accent);
+    }
+
+    .nav-icon {
+      display: grid;
+      width: 22px;
+      height: 22px;
+      place-items: center;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .nav-item[aria-current="page"] .nav-icon { color: var(--accent); }
+    .nav-text { flex: 1; font-size: 13px; font-weight: 600; }
+    .nav-chevron { color: #73839b; font-size: 17px; }
+    .sidebar-spacer { flex: 1; min-height: 32px; }
+    .sidebar-note {
+      padding: 14px 12px;
+      color: var(--muted);
+      background: rgba(255,255,255,.035);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      font-size: 11px;
+      line-height: 1.55;
+    }
+
+    .sidebar-note strong { display: block; margin-bottom: 4px; color: #dbe5f2; font-size: 12px; }
+    .sidebar-note .logistics-widget { margin-top: 10px; }
+    .workspace { display: flex; min-width: 0; height: 100%; min-height: 0; flex-direction: column; overflow: hidden; }
+    .topbar {
+      display: flex;
+      min-height: 76px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 14px 28px;
+      background: rgba(16, 27, 45, .78);
+      border-bottom: 1px solid var(--border);
+      animation: header-enter .35s ease both;
+    }
+
+    .page-title { margin: 0; font-size: 17px; font-weight: 700; }
+    .page-subtitle { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+    .topbar-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 11px;
+      color: #a5b6c9;
+      background: rgba(255,255,255,.035);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(85, 214, 160, .55);
+    }
+
+    .content { display: flex; flex: 1; min-height: 0; flex-direction: column; padding: 18px; }
+    .frame-shell {
+      position: relative;
+      display: flex;
+      flex: 1;
+      min-height: 460px;
+      flex-direction: column;
+      overflow: hidden;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      box-shadow: 0 16px 44px rgba(0,0,0,.2);
+      animation: frame-enter .42s cubic-bezier(.2,.75,.25,1) both;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .frame-shell.is-navigating .main-frame { opacity: .35; transform: scale(.995); }
+    .main-frame { transition: opacity .22s ease, transform .22s ease; }
+    .frame-toolbar {
+      display: flex;
+      min-height: 43px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 14px;
+      color: #aebbd0;
+      background: #142137;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+    }
+
+    .frame-caption { display: flex; min-width: 0; align-items: center; gap: 9px; }
+    .frame-caption span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .frame-indicator { width: 7px; height: 7px; flex: 0 0 auto; background: var(--accent); border-radius: 50%; }
+    .open-link { color: #c6d4e6; text-decoration: none; white-space: nowrap; }
+    .open-link:hover { color: var(--accent); }
+    iframe { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
+    .main-frame { flex: 1; min-height: 0; }
+
+    .logistics-widget {
+      display: flex;
+      width: 100%;
+      height: 258px;
+      flex-direction: column;
+      overflow: hidden;
+      background: #142137;
+      border: 1px solid rgba(190, 207, 231, .2);
+      border-radius: 12px;
+      transition: height .18s ease;
+    }
+
+    .logistics-widget.is-collapsed { height: 44px; }
+    .widget-header {
+      display: flex;
+      min-height: 43px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 0 11px 0 13px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .widget-title { display: flex; min-width: 0; align-items: center; gap: 8px; color: #e8eef7; font-size: 11px; font-weight: 700; }
+    .widget-title span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .widget-controls { display: flex; flex: 0 0 auto; align-items: center; gap: 9px; }
+    .widget-open { color: #9eacc0; font-size: 10px; text-decoration: none; }
+    .widget-open:hover { color: var(--accent); }
+    .widget-toggle {
+      display: grid;
+      width: 25px;
+      height: 25px;
+      place-items: center;
+      color: #d8e1ee;
+      background: rgba(255,255,255,.06);
+      border: 0;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .widget-body { flex: 1; min-height: 0; }
+    .widget-frame {
+      width: 720%;
+      height: 625%;
+      max-width: none;
+      background: #0b1321;
+      transform: scale(.13889, .16);
+      transform-origin: top left;
+    }
+    .widget-collapsed-label { display: none; }
+    .is-collapsed .widget-collapsed-label { display: inline; }
+    .is-collapsed .widget-open, .is-collapsed .widget-title .status-dot { display: none; }
+    .is-collapsed .widget-header { min-height: 43px; border-bottom: 0; }
+    .topbar-actions { display: flex; align-items: center; gap: 12px; }
+    .topbar-back {
+      padding: 8px 11px;
+      color: #dbe5f2;
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    .topbar-back:hover { color: var(--accent); }
+
+    .temperature-alert-toggle {
+      display: inline-flex;
+      min-height: 48px;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 0 18px;
+      color: #fff;
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 999px;
+      box-shadow: 0 10px 28px rgba(127, 29, 29, .38);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: .015em;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+    .temperature-alert-toggle:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(127, 29, 29, .48); }
+    .temperature-alert-toggle:active { transform: translateY(0) scale(.98); }
+    .temperature-alert-toggle[aria-pressed="false"] { background: linear-gradient(135deg, #b91c1c, #7f1d1d); box-shadow: 0 8px 22px rgba(127, 29, 29, .3); }
+    .temperature-alert-toggle .alert-button-icon { font-size: 17px; line-height: 1; }
+    .temperature-alert-toggle[aria-pressed="true"] .alert-button-icon { animation: alert-pulse 2s ease-in-out infinite; }
+    .temperature-alert-controls {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 14px;
+      padding: 0 24px 18px;
+    }
+
+    .temperature-alert-status {
+      max-width: min(320px, calc(100vw - 32px));
+      padding: 8px 11px;
+      color: #e2e8f0;
+      background: rgba(15, 23, 42, .94);
+      border: 1px solid rgba(190, 207, 231, .16);
+      border-radius: 8px;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .temperature-alert-modal {
+      position: fixed;
+      z-index: 30;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(4, 10, 20, .76);
+      backdrop-filter: blur(5px);
+    }
+
+    .temperature-alert-modal.is-visible { display: flex; animation: alert-fade-in .2s ease both; }
+    .temperature-alert-card {
+      width: min(440px, 100%);
+      padding: 30px;
+      color: #e9eef7;
+      background: #142137;
+      border: 1px solid rgba(248, 113, 113, .42);
+      border-top: 4px solid #ef4444;
+      border-radius: 16px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.45);
+      text-align: center;
+      animation: alert-card-enter .28s cubic-bezier(.2,.75,.25,1) both;
+    }
+
+    .temperature-alert-card h2 { margin: 0 0 10px; font-size: 20px; }
+    .temperature-alert-card p { margin: 0 0 22px; color: #c0ccdc; font-size: 14px; line-height: 1.6; }
+    .temperature-alert-card button {
+      min-height: 44px;
+      padding: 0 16px;
+      color: #fff;
+      background: #b91c1c;
+      border: 0;
+      border-radius: 9px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: background .18s ease, transform .18s ease;
+    }
+
+    .temperature-alert-card button:hover { background: #dc2626; transform: translateY(-1px); }
+
+    @keyframes header-enter { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes frame-enter { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes alert-fade-in { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes alert-card-enter { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes alert-pulse { 50% { transform: scale(1.12); } }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+
+    @media (max-width: 760px) {
+      .app { height: auto; grid-template-columns: 1fr; }
+      .sidebar { height: auto; min-height: 0; padding: 13px 14px 10px; border-right: 0; border-bottom: 1px solid var(--border); }
+      .brand { margin: 0 0 14px; }
+      .section-label, .sidebar-spacer { display: none; }
+      .sidebar-note { display: block; margin-top: 12px; }
+      .sidebar-note .logistics-widget { height: 300px; }
+      .sidebar-note .logistics-widget.is-collapsed { height: 43px; }
+      .sidebar-note .widget-frame {
+        width: 460%;
+        height: 625%;
+        transform: scale(.21739, .16);
+      }
+      .nav-list { display: flex; gap: 7px; overflow-x: auto; }
+      .nav-item { width: auto; min-height: 40px; flex: 0 0 auto; gap: 7px; padding: 0 10px; }
+      .nav-text { font-size: 12px; }
+      .nav-chevron { display: none; }
+      .workspace { height: auto; min-height: calc(100vh - 126px); overflow: visible; }
+      .topbar { min-height: 65px; padding: 12px 17px; }
+      .content { padding: 10px; }
+      .frame-shell { min-height: 420px; }
+      .temperature-alert-controls { justify-content: space-between; gap: 8px; padding: 0 10px 12px; }
+      .temperature-alert-toggle { min-height: 46px; padding: 0 15px; }
+      .temperature-alert-card { padding: 24px 20px; }
+      .temperature-alert-status { max-width: 55%; }
+    }
+
+    @media (max-width: 420px) {
+      .topbar-status { padding: 7px 8px; font-size: 10px; }
+      .page-title { font-size: 15px; }
+      .page-subtitle { max-width: 210px; font-size: 11px; }
+      .nav-icon { display: none; }
+      .frame-toolbar { padding: 0 10px; }
+      .temperature-alert-controls { align-items: stretch; flex-direction: column-reverse; }
+      .temperature-alert-toggle { align-self: flex-end; }
+      .temperature-alert-status { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Navegación principal">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 3.5 34 9v9.2c0 8.8-5.7 14.7-14 18.3C11.7 32.9 6 27 6 18.2V9l14-5.5Z" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/>
+            <path d="M14.2 15.2c0-2.3 2.1-4 5.5-4 2.1 0 4 .6 5.5 1.8M25.6 24.8c0 2.3-2.1 4-5.5 4-2.1 0-4-.6-5.5-1.8M20 10.8v18.4" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <p class="brand-name">PUESTO UNO</p>
+          <p class="brand-caption">Centro de operaciones</p>
+        </div>
+      </div>
+
+      <p class="section-label">Implementaciones</p>
+      <nav class="nav-list" aria-label="Implementaciones">
+        <button class="nav-item" type="button" data-title="Planificación semanal operativa" data-subtitle="Cronograma operativo" data-section="inicio">
+          <span class="nav-icon" aria-hidden="true">▦</span>
+          <span class="nav-text">Planificación semanal</span>
+          <span class="nav-chevron" aria-hidden="true">›</span>
+        </button>
+        <button class="nav-item" type="button" data-title="Control de Visitas - COFARMEN" data-subtitle="Registro de personas que ingresan" data-url="https://script.google.com/macros/s/AKfycbxQ7BGSTo0CQOSaHifh3p5GohZv-n0yA4Hm6iwJOs6AnZjKiOFZsfA9t5-7mG9G4pmw/exec" aria-current="page">
+          <span class="nav-icon" aria-hidden="true">◉</span>
+          <span class="nav-text">Control de visitas</span>
+          <span class="nav-chevron" aria-hidden="true">›</span>
+        </button>
+        <button class="nav-item" type="button" data-title="Relevamiento de cámaras CCTV" data-subtitle="Relevamiento de cámaras de seguridad" data-url="https://script.google.com/macros/s/AKfycby3W5SfFD0Y7buoV6xyTioNq8NhAPDwsaIUfAMXTiffLcF1_YBKcoeAzv-IeiyJ1qHQ/exec">
+          <span class="nav-icon" aria-hidden="true">⌕</span>
+          <span class="nav-text">Relevamiento CCTV</span>
+          <span class="nav-chevron" aria-hidden="true">›</span>
+        </button>
+        <button class="nav-item" type="button" data-title="Control de temperatura" data-subtitle="Registro horario de temperatura" data-section="temperatura">
+          <span class="nav-icon" aria-hidden="true">°</span>
+          <span class="nav-text">Control temperatura</span>
+          <span class="nav-chevron" aria-hidden="true">›</span>
+        </button>
+        <button class="nav-item" type="button" data-title="Credenciales" data-subtitle="Vencimientos y estado de credenciales" data-section="credenciales">
+          <span class="nav-icon" aria-hidden="true">▣</span>
+          <span class="nav-text">Credenciales</span>
+          <span class="nav-chevron" aria-hidden="true">›</span>
+        </button>
+        <button class="nav-item" type="button" data-title="Solicitud de uniformes" data-subtitle="Gestión de solicitudes de uniforme" data-section="uniformes">
+          <span class="nav-icon" aria-hidden="true">▤</span>
+          <span class="nav-text">Solicitud uniformes</span>
+          <span class="nav-chevron" aria-hidden="true">›</span>
+        </button>
+        <button class="nav-item" type="button" data-title="Capacitaciones" data-subtitle="Materiales y módulos de capacitación" data-section="capacitaciones">
+          <span class="nav-icon" aria-hidden="true">▱</span>
+          <span class="nav-text">Capacitaciones</span>
+          <span class="nav-chevron" aria-hidden="true">›</span>
+        </button>
+        <button class="nav-item" type="button" data-title="Tareas técnicas" data-subtitle="Registro y seguimiento de tareas técnicas" data-section="tareas-tecnicas">
+          <span class="nav-icon" aria-hidden="true">⚙</span>
+          <span class="nav-text">Tareas técnicas</span>
+          <span class="nav-chevron" aria-hidden="true">›</span>
+        </button>
+        <button class="nav-item" type="button" data-title="Envío Formal de Correo" data-subtitle="Preparación y envío de informes ejecutivos a Gerencia" data-view="correo">
+          <span class="nav-icon" aria-hidden="true">✉</span>
+          <span class="nav-text">Envío Formal de Correo</span>
+          <span class="nav-chevron" aria-hidden="true">›</span>
+        </button>
+        <button class="nav-item" type="button" data-title="Solicitud de útiles" data-subtitle="Pedidos de útiles e insumos" data-section="utiles">
+          <span class="nav-icon" aria-hidden="true">▤</span>
+          <span class="nav-text">Solicitud de útiles</span>
+          <span class="nav-chevron" aria-hidden="true">›</span>
+        </button>
+        <button class="nav-item" type="button" data-title="Acceso restringido" data-subtitle="Enlaces a sistemas y fuentes de datos" data-url="acceso.html">
+          <span class="nav-icon" aria-hidden="true">▣</span>
+          <span class="nav-text">Acceso restringido</span>
+          <span class="nav-chevron" aria-hidden="true">›</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-note">
+        <strong>Espacio de trabajo</strong>
+        <aside class="logistics-widget" id="logistics-widget" aria-label="Monitor de logística">
+          <div class="widget-header">
+            <div class="widget-title">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span>Monitor de logística</span>
+              <span class="widget-collapsed-label">· Camionetas</span>
+            </div>
+            <div class="widget-controls">
+              <a class="widget-open" href="https://script.google.com/macros/s/AKfycbx_y9vn6mWZFO7mcuzZuxrN6FNlUspeZu4dwU-So0Z0F3gK931eDO1K-F4m8plMm5V0/exec" target="_blank" rel="noopener noreferrer">Abrir ↗</a>
+              <button class="widget-toggle" id="widget-expand" type="button" aria-label="Ampliar monitor de logística" aria-expanded="false">⛶</button>
+              <button class="widget-toggle" id="widget-toggle" type="button" aria-label="Minimizar monitor de logística" aria-expanded="true">−</button>
+            </div>
+          </div>
+          <div class="widget-body">
+            <iframe class="widget-frame" title="Monitor de logística: seguimiento de salida de camionetas" src="https://script.google.com/macros/s/AKfycbx_y9vn6mWZFO7mcuzZuxrN6FNlUspeZu4dwU-So0Z0F3gK931eDO1K-F4m8plMm5V0/exec" loading="eager" allow="fullscreen"></iframe>
+          </div>
+        </aside>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div>
+          <h1 class="page-title" id="page-title">Control de Visitas - COFARMEN</h1>
+          <p class="page-subtitle" id="page-subtitle">Registro de personas que ingresan</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="topbar-back" id="workspace-back" type="button" hidden>← Volver</button>
+          <div class="topbar-status"><span class="status-dot" aria-hidden="true"></span>Panel de implementaciones</div>
+        </div>
+      </header>
+
+      <section class="content" aria-label="Aplicación seleccionada">
+        <div class="frame-shell">
+          <div class="frame-toolbar">
+            <div class="frame-caption"><span class="frame-indicator" aria-hidden="true"></span><span id="frame-label">Control de Visitas - COFARMEN</span></div>
+            <a class="open-link" id="main-open-link" href="https://script.google.com/macros/s/AKfycbxQ7BGSTo0CQOSaHifh3p5GohZv-n0yA4Hm6iwJOs6AnZjKiOFZsfA9t5-7mG9G4pmw/exec" target="_blank" rel="noopener noreferrer">Abrir en pestaña nueva ↗</a>
+          </div>
+          <iframe class="main-frame" id="main-frame" title="Control de Visitas - COFARMEN" src="https://script.google.com/macros/s/AKfycbxQ7BGSTo0CQOSaHifh3p5GohZv-n0yA4Hm6iwJOs6AnZjKiOFZsfA9t5-7mG9G4pmw/exec" allow="fullscreen"></iframe>
+        </div>
+      </section>
+      <div class="temperature-alert-controls">
+        <div class="temperature-alert-status" id="temperature-alert-status" role="status" aria-live="polite">
+          Recordatorio horario activo. El sonido se habilita al interactuar con la página.
+        </div>
+        <button class="temperature-alert-toggle" id="temperature-alert-toggle" type="button" aria-pressed="true" aria-label="Habilitar el sonido de los recordatorios horarios de temperatura">
+          <span class="alert-button-icon" aria-hidden="true">◉</span>
+          <span id="temperature-alert-toggle-label">Habilitar sonido</span>
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <section class="temperature-alert-modal" id="temperature-alert-modal" role="alertdialog" aria-modal="true" aria-labelledby="temperature-alert-title" aria-describedby="temperature-alert-description">
+    <div class="temperature-alert-card">
+      <h2 id="temperature-alert-title">Alerta de control de temperatura</h2>
+      <p id="temperature-alert-description">Realice el control horario obligatorio del servidor.</p>
+      <button type="button" id="temperature-alert-open">Ir al control de temperatura</button>
+    </div>
+  </section>
+
+  <script>
+    const mainFrame = document.getElementById("main-frame");
+    const mainOpenLink = document.getElementById("main-open-link");
+    const pageTitle = document.getElementById("page-title");
+    const pageSubtitle = document.getElementById("page-subtitle");
+    const frameLabel = document.getElementById("frame-label");
+    const appLayout = document.querySelector(".app");
+    const navItems = document.querySelectorAll(".nav-item");
+    const workspaceBack = document.getElementById("workspace-back");
+    const frameShell = document.querySelector(".frame-shell");
+    const temperatureAlertToggle = document.getElementById("temperature-alert-toggle");
+    const temperatureAlertToggleLabel = document.getElementById("temperature-alert-toggle-label");
+    const temperatureAlertStatus = document.getElementById("temperature-alert-status");
+    const temperatureAlertModal = document.getElementById("temperature-alert-modal");
+    const temperatureAlertOpen = document.getElementById("temperature-alert-open");
+    const backendUrl = "https://script.google.com/macros/s/AKfycbwVOLnO9Ai4Vj95QUku5rg3rvYDXHi3h1sU-CSYjzzeIHQU6DvMXUjr9WycukcI02-v/exec";
+    const logisticsUrl = "https://script.google.com/macros/s/AKfycbx_y9vn6mWZFO7mcuzZuxrN6FNlUspeZu4dwU-So0Z0F3gK931eDO1K-F4m8plMm5V0/exec";
+    let workspaceBeforeLogistics = null;
+    const temperatureAlertInterval = 60 * 60 * 1000;
+    let temperatureAlertEnabled = true;
+    let nextTemperatureAlertAt = Date.now() + temperatureAlertInterval;
+    let temperatureAlertTimer;
+    let alertAudioContext;
+    let alertAudioReady = false;
+    let alertAudioUnavailable = false;
+
+    function updateTemperatureAlertControl() {
+      const actionLabel = !temperatureAlertEnabled
+        ? "Encender alerta"
+        : alertAudioReady || alertAudioUnavailable ? "Silenciar alerta" : "Habilitar sonido";
+      const actionDescription = !temperatureAlertEnabled
+        ? "Encender los recordatorios horarios de temperatura"
+        : alertAudioReady || alertAudioUnavailable
+          ? "Silenciar los recordatorios horarios de temperatura"
+          : "Habilitar el sonido de los recordatorios horarios de temperatura";
+      temperatureAlertToggle.setAttribute("aria-pressed", String(temperatureAlertEnabled));
+      temperatureAlertToggle.setAttribute("aria-label", actionDescription);
+      temperatureAlertToggleLabel.textContent = actionLabel;
+      if (!alertAudioUnavailable) {
+        temperatureAlertStatus.textContent = temperatureAlertEnabled
+          ? alertAudioReady
+            ? "Recordatorio horario activo con sonido habilitado."
+            : "Recordatorio horario activo. El sonido se habilita al interactuar con la página."
+          : "Recordatorio horario silenciado.";
+      }
+    }
+
+    updateTemperatureAlertControl();
+
+    function prepararAudioAlerta() {
+      if (alertAudioUnavailable || alertAudioContext) return;
+      if (!window.AudioContext) {
+        alertAudioUnavailable = true;
+        temperatureAlertStatus.textContent = "Este navegador no admite alertas sonoras; los avisos visuales siguen activos.";
+        return;
+      }
+      try {
+        alertAudioContext = new window.AudioContext();
+      } catch (error) {
+        console.error("No se pudo iniciar el audio de la alerta de temperatura:", error);
+        alertAudioUnavailable = true;
+        temperatureAlertStatus.textContent = "No se pudo iniciar el sonido. Revise los permisos de audio del navegador.";
+        return;
+      }
+      alertAudioContext.resume().catch((error) => {
+        console.error("No se pudo habilitar el sonido de la alerta de temperatura:", error);
+        alertAudioUnavailable = true;
+        temperatureAlertStatus.textContent = "No se pudo habilitar el sonido. Revise los permisos de audio del navegador.";
+      });
+      alertAudioContext.addEventListener("statechange", () => {
+        alertAudioReady = alertAudioContext.state === "running";
+        updateTemperatureAlertControl();
+      });
+    }
+
+    function reproducirTonoAlerta() {
+      if (!temperatureAlertEnabled || !alertAudioContext || alertAudioContext.state !== "running") return;
+      const inicio = alertAudioContext.currentTime;
+      [0, 0.45, 0.9].forEach((separacion) => {
+        const oscilador = alertAudioContext.createOscillator();
+        const volumen = alertAudioContext.createGain();
+        oscilador.type = "sine";
+        oscilador.frequency.value = 880;
+        volumen.gain.setValueAtTime(0.001, inicio + separacion);
+        volumen.gain.exponentialRampToValueAtTime(0.22, inicio + separacion + 0.025);
+        volumen.gain.exponentialRampToValueAtTime(0.001, inicio + separacion + 0.28);
+        oscilador.connect(volumen);
+        volumen.connect(alertAudioContext.destination);
+        oscilador.start(inicio + separacion);
+        oscilador.stop(inicio + separacion + 0.3);
+      });
+    }
+
+    function dispararAlertaTemperatura() {
+      if (!temperatureAlertEnabled) return;
+      temperatureAlertModal.classList.add("is-visible");
+      reproducirTonoAlerta();
+      if (!alertAudioReady && !alertAudioUnavailable) {
+        temperatureAlertStatus.textContent = "Aviso visual activo. Interactúe con la página para habilitar el sonido.";
+      }
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+        const discurso = new SpeechSynthesisUtterance("Alerta operativa. Realice el control obligatorio de temperatura del servidor.");
+        discurso.lang = "es-ES";
+        discurso.rate = 0.9;
+        window.speechSynthesis.speak(discurso);
+      }
+    }
+
+    function programarAlertaTemperatura() {
+      window.clearTimeout(temperatureAlertTimer);
+      if (!temperatureAlertEnabled) return;
+      const demora = Math.max(0, nextTemperatureAlertAt - Date.now());
+      temperatureAlertTimer = window.setTimeout(() => {
+        dispararAlertaTemperatura();
+        nextTemperatureAlertAt = Date.now() + temperatureAlertInterval;
+        programarAlertaTemperatura();
+      }, demora);
+    }
+
+    function comprobarAlertaTemperaturaPendiente() {
+      if (temperatureAlertEnabled && Date.now() >= nextTemperatureAlertAt) {
+        dispararAlertaTemperatura();
+        nextTemperatureAlertAt = Date.now() + temperatureAlertInterval;
+        programarAlertaTemperatura();
+      }
+    }
+
+    document.addEventListener("click", prepararAudioAlerta, { once: true });
+    document.addEventListener("keydown", prepararAudioAlerta, { once: true });
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) comprobarAlertaTemperaturaPendiente();
+    });
+    window.addEventListener("focus", comprobarAlertaTemperaturaPendiente);
+    temperatureAlertToggle.addEventListener("click", () => {
+      if (temperatureAlertEnabled && !alertAudioReady && !alertAudioUnavailable) {
+        prepararAudioAlerta();
+        return;
+      }
+      temperatureAlertEnabled = !temperatureAlertEnabled;
+      if (temperatureAlertEnabled) {
+        prepararAudioAlerta();
+        nextTemperatureAlertAt = Date.now() + temperatureAlertInterval;
+      } else {
+        temperatureAlertModal.classList.remove("is-visible");
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      }
+      updateTemperatureAlertControl();
+      programarAlertaTemperatura();
+    });
+    temperatureAlertOpen.addEventListener("click", () => {
+      temperatureAlertModal.classList.remove("is-visible");
+      const temperatureNavItem = document.querySelector(".nav-item[data-section='temperatura']");
+      if (temperatureNavItem) temperatureNavItem.click();
+    });
+    programarAlertaTemperatura();
+
+    navItems.forEach((item) => {
+      item.addEventListener("click", () => {
+        const { title, subtitle, url, section, view } = item.dataset;
+        const destination = view === "correo"
+          ? `${backendUrl}?vista=correo`
+          : section ? `${backendUrl}?vista=operaciones&seccion=${encodeURIComponent(section)}` : url;
+        if (!title || !subtitle || !destination) return;
+
+        if (workspaceBeforeLogistics) logisticsFrame.src = logisticsUrl;
+        workspaceBeforeLogistics = null;
+        appLayout.classList.remove("logistics-open");
+        workspaceBack.hidden = true;
+        frameShell.classList.add("is-navigating");
+        mainFrame.src = destination;
+        mainFrame.title = title;
+        mainOpenLink.href = destination;
+        pageTitle.textContent = title;
+        pageSubtitle.textContent = subtitle;
+        frameLabel.textContent = title;
+
+        navItems.forEach((navItem) => navItem.removeAttribute("aria-current"));
+        item.setAttribute("aria-current", "page");
+        window.setTimeout(() => frameShell.classList.remove("is-navigating"), 260);
+      });
+    });
+
+    mainFrame.addEventListener("load", () => frameShell.classList.remove("is-navigating"));
+
+    const logisticsWidget = document.getElementById("logistics-widget");
+    const logisticsFrame = logisticsWidget.querySelector(".widget-frame");
+    const widgetToggle = document.getElementById("widget-toggle");
+    const widgetExpand = document.getElementById("widget-expand");
+
+    widgetExpand.addEventListener("click", () => {
+      if (!workspaceBeforeLogistics) {
+        workspaceBeforeLogistics = {
+          src: mainFrame.src,
+          title: mainFrame.title,
+          pageTitle: pageTitle.textContent,
+          subtitle: pageSubtitle.textContent,
+          frameLabel: frameLabel.textContent,
+          navItem: document.querySelector(".nav-item[aria-current='page']")
+        };
+      }
+      logisticsFrame.src = "about:blank";
+      mainFrame.src = logisticsUrl;
+      appLayout.classList.add("logistics-open");
+      mainFrame.title = "Monitor de logística";
+      mainOpenLink.href = logisticsUrl;
+      pageTitle.textContent = "Monitor de logística";
+      pageSubtitle.textContent = "Seguimiento de salida de camionetas";
+      frameLabel.textContent = "Monitor de logística";
+      navItems.forEach((item) => item.removeAttribute("aria-current"));
+      workspaceBack.hidden = false;
+      widgetExpand.setAttribute("aria-expanded", "true");
+      widgetExpand.setAttribute("aria-label", "Monitor de logística abierto en el espacio principal");
+    });
+
+    workspaceBack.addEventListener("click", () => {
+      if (!workspaceBeforeLogistics) return;
+      mainFrame.src = workspaceBeforeLogistics.src;
+      logisticsFrame.src = logisticsUrl;
+      appLayout.classList.remove("logistics-open");
+      mainFrame.title = workspaceBeforeLogistics.title;
+      mainOpenLink.href = workspaceBeforeLogistics.src;
+      pageTitle.textContent = workspaceBeforeLogistics.pageTitle;
+      pageSubtitle.textContent = workspaceBeforeLogistics.subtitle;
+      frameLabel.textContent = workspaceBeforeLogistics.frameLabel;
+      if (workspaceBeforeLogistics.navItem) {
+        workspaceBeforeLogistics.navItem.setAttribute("aria-current", "page");
+      }
+      workspaceBeforeLogistics = null;
+      workspaceBack.hidden = true;
+      widgetExpand.setAttribute("aria-expanded", "false");
+      widgetExpand.setAttribute("aria-label", "Ampliar monitor de logística en el espacio principal");
+    });
+
+    widgetToggle.addEventListener("click", () => {
+      const isCollapsed = logisticsWidget.classList.toggle("is-collapsed");
+      widgetToggle.textContent = isCollapsed ? "+" : "−";
+      widgetToggle.setAttribute("aria-expanded", String(!isCollapsed));
+      widgetToggle.setAttribute("aria-label", isCollapsed ? "Expandir monitor de logística" : "Minimizar monitor de logística");
+    });
+  </script>
+</body>
+</html>
