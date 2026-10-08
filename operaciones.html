@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puesto Uno | Módulos operativos</title>
+  <base target="_blank">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-sidebar: #0f172a;
+      --bg-main: #f8fafc;
+      --border-radius: 8px;
+      --primary-color: #1e3a8a;
+      --accent-color: #0284c7;
+      --text-dark: #334155;
+      --text-light: #f8fafc;
+      
+      /* Colores de Turnos Optimizados (Pastel Profesional) */
+      --turno-m: #e0f2fe;
+      --turno-m-text: #0369a1;
+      --turno-t: #dcfce7;
+      --turno-t-text: #15803d;
+      --turno-n: #fee2e2;
+      --turno-n-text: #b91c1c;
+      --turno-franco: #fef9c3;
+      --turno-franco-text: #a16207;
+      --turno-reten: #f1f5f9;
+      --turno-reten-text: #475569;
+    }
+
+    body {
+      display: block;
+      min-height: 100vh;
+      background-color: var(--bg-main);
+      color: var(--text-dark);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    #slide-out { display: none !important; }
+
+    /* MENÚ LATERAL (ESTILO EMPRESARIAL) */
+    .sidenav-fixed {
+      width: 290px;
+      background-color: var(--bg-sidebar) !important;
+      border-right: 1px solid #e2e8f0;
+      box-shadow: 4px 0 10px rgba(0,0,0,0.05);
+    }
+    .sidenav li a {
+      color: #94a3b8 !important;
+      font-size: 0.9rem !important;
+      font-weight: 500;
+      padding: 0 24px !important;
+      display: flex;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+    .sidenav li a i {
+      color: #64748b !important;
+      margin-right: 14px !important;
+      font-size: 20px !important;
+    }
+    .sidenav li a:hover, .sidenav li.active a {
+      background-color: rgba(255, 255, 255, 0.05) !important;
+      color: var(--text-light) !important;
+    }
+    .sidenav li.active a {
+      border-left: 4px solid var(--accent-color);
+      background-color: rgba(2, 132, 199, 0.15) !important;
+    }
+    .sidenav li.active a i {
+      color: var(--accent-color) !important;
+    }
+    .sidenav .divider {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      margin: 8px 0;
+    }
+    
+    .menu-header {
+      text-align: center;
+      padding: 32px 16px;
+      background: #0b1329;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    /* BLOQUE DE LOGO PRINCIPAL */
+    .menu-logo-container {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .menu-logo-container i {
+      font-size: 40px;
+      color: var(--accent-color);
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    main {
+      flex: 1 0 auto;
+      padding: 24px;
+      background-color: #f8fafc;
+    }
+    @media only screen and (max-width : 992px) {
+      main { padding-left: 20px; padding-right: 20px; }
+    }
+
+    /* ENCABEZADO DE PÁGINA */
+    .page-header-corp {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .page-header-corp h4 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0;
+    }
+
+    /* TARJETAS EMPRESARIALES */
+    .panel-card {
+      background: #ffffff;
+      border-radius: var(--border-radius);
+      padding: 24px;
+      margin-bottom: 25px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.02);
+      border: 1px solid #e2e8f0;
+    }
+    .panel-card h5 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #0f172a;
+      margin-top: 0;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .panel-card h5 i {
+      font-size: 22px;
+    }
+
+    /* FORMULARIOS ESTILIZADOS */
+    .input-field input[type=text]:focus, 
+    .input-field textarea:focus {
+      border-bottom: 2px solid var(--accent-color) !important;
+      box-shadow: none !important;
+    }
+    .input-field input[type=text]:focus + label,
+    .input-field textarea:focus + label {
+      color: var(--accent-color) !important;
+    }
+    select.browser-default {
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 10px;
+      height: 44px;
+      background-color: #fff;
+      color: var(--text-dark);
+      outline: none;
+    }
+    select.browser-default:focus {
+      border-color: var(--accent-color);
+    }
+
+    /* TABLAS CUSTOM */
+    table.custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    table.custom-table th {
+      background-color: #f1f5f9;
+      color: #475569;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      padding: 14px 16px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+    table.custom-table td {
+      background: #ffffff;
+      padding: 12px 16px;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 0.85rem;
+      color: #334155;
+    }
+    table.custom-table tbody tr:hover td {
+      background-color: #f8fafc;
+    }
+
+    /* CLASES DE TURNOS */
+    .block-turno {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-align: center;
+      min-width: 70px;
+    }
+    .t-m { background-color: var(--turno-m); color: var(--turno-m-text); }
+    .t-t { background-color: var(--turno-t); color: var(--turno-t-text); }
+    .t-n { background-color: var(--turno-n); color: var(--turno-n-text); }
+    .t-franco { background-color: var(--turno-franco); color: var(--turno-franco-text); }
+    .t-reten { background-color: var(--turno-reten); color: var(--turno-reten-text); }
+
+    .badge-status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .status-ok { background-color: #dcfce7; color: #166534; }
+    .status-error { background-color: #fee2e2; color: #991b1b; }
+
+    .chip-integracion {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      margin-right: 8px;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+
+    #cronograma-contenedor-grafico {
+      min-height: 400px;
+      overflow: auto;
+    }
+
+    .portal-capacitaciones-frame {
+      position: relative;
+      display: flex;
+      min-height: 250px;
+      align-items: center;
+      overflow: hidden;
+      padding: 28px 195px 28px 28px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+    }
+    .portal-capacitaciones-message h6 {
+      margin: 0 0 10px;
+      color: #0f172a;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .portal-capacitaciones-message p {
+      max-width: 540px;
+      margin: 0 0 16px;
+      color: #475569;
+      line-height: 1.6;
+    }
+    .portal-capacitaciones-qr {
+      position: absolute;
+      z-index: 2;
+      top: 16px;
+      right: 16px;
+      width: 154px;
+      padding: 10px;
+      color: #334155;
+      background: rgba(255,255,255,.97);
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(15,23,42,.18);
+      text-align: center;
+    }
+    .portal-capacitaciones-qr strong {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+    .portal-capacitaciones-qr-code {
+      display: inline-flex;
+      min-width: 120px;
+      min-height: 120px;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      background: #fff;
+    }
+    .portal-capacitaciones-qr-code img { display: block; }
+    .portal-capacitaciones-open {
+      display: inline-block;
+      margin-top: 6px;
+      color: #1e40af;
+      font-size: 11px;
+      font-weight: 600;
+      text-decoration: underline;
+    }
+
+    @media only screen and (max-width : 600px) {
+      .portal-capacitaciones-frame { min-height: 330px; align-items: flex-start; padding: 24px 12px 180px; }
+      .portal-capacitaciones-qr { top: 10px; right: 10px; width: 142px; padding: 8px; }
+      .portal-capacitaciones-message p { max-width: 190px; }
+    }
+
+    /* MODAL ALERTA */
+    .modal-alerta-style {
+      background: #ffffff; 
+      color: #0f172a; 
+      padding: 35px; 
+      border-radius: 8px; 
+      max-width: 480px; 
+      width: 100%; 
+      text-align: center; 
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); 
+      border-top: 5px solid #ef4444;
+    }
+
+  </style>
+</head>
+<body>
+
+  <ul id="slide-out" class="sidenav sidenav-fixed">
+    <li>
+      <div class="menu-header">
+        <div class="menu-logo-container">
+          <i class="material-icons">shield</i>
+        </div>
+        <div style="font-weight: 700; font-size: 1.2rem; color: #ffffff; letter-spacing: 0.5px;">COFARMEN</div>
+        <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">Puesto Uno · Módulos operativos</div>
+      </div>
+    </li>
+    <li class="active" id="menu-inicio"><a href="#" onclick="cambiarSeccion('inicio')"><i class="material-icons">dashboard</i>Inicio / Home</a></li>
+    <li id="menu-admin"><a href="#" onclick="abrirEdicionCronograma()"><i class="material-icons">edit_calendar</i>Edición de cronograma</a></li>
+    <li class="divider"></li>
+    <li id="menu-temperatura"><a href="#" onclick="cambiarSeccion('temperatura')"><i class="material-icons">thermostat</i>Control Temperatura</a></li>
+    <li id="menu-credenciales"><a href="#" onclick="cambiarSeccion('credenciales')"><i class="material-icons">badge</i>Credenciales</a></li>
+    <li id="menu-uniformes"><a href="#" onclick="cambiarSeccion('uniformes')"><i class="material-icons">checkroom</i>Solicitud Uniformes</a></li>
+    <li id="menu-novedades"><a href="#" onclick="cambiarSeccion('novedades')"><i class="material-icons">mail</i>Envío Formal de Correo</a></li>
+    <li id="menu-utiles"><a href="#" onclick="cambiarSeccion('utiles')"><i class="material-icons">shopping_bag</i>Solicitud de Útiles</a></li>
+    <li id="menu-capacitaciones"><a href="#" onclick="cambiarSeccion('capacitaciones')"><i class="material-icons">school</i>Capacitaciones</a></li>
+    <li id="menu-tareas-tecnicas"><a href="#" onclick="cambiarSeccion('tareas-tecnicas')"><i class="material-icons">build</i>Tareas Técnicas</a></li>
+  </ul>
+
+  <main>
+    
+    <div class="page-header-corp">
+      <div>
+        <h4>Panel de Control Operativo</h4>
+        <p class="grey-text text-darken-1" style="margin: 4px 0 0 0; font-size: 0.9rem;">Gestión interna de seguridad física e infraestructura</p>
+      </div>
+      </div>
+
+    <div id="estado-backend" role="status" style="margin-bottom:20px; padding:14px 16px; color:#854d0e; background:#fefce8; border:1px solid #fde68a; border-radius:6px; line-height:1.5;">
+      El backend propio de Puesto Uno todavía no está configurado. Las lecturas y escrituras se habilitarán después de desplegar <strong>Code.gs</strong> y configurar su URL en este módulo, como indica <strong>MIGRACION_BACKEND.md</strong>.
+    </div>
+
+    <div class="row">
+      
+      <div id="sec-inicio" class="seccion-app col s12">
+        <div class="panel-card">
+          <h5><i class="material-icons indigo-text text-darken-3">calendar_view_week</i> Planificación Semanal Operativa</h5>
+          <div id="cronograma-contenedor-grafico" class="responsive-table"></div>
+        </div>
+
+        <div class="panel-card">
+          <h5><i class="material-icons blue-text text-darken-3">group</i> Alertas de Integración de Personal</h5>
+          <div id="integracion-personal-contenedor"></div>
+        </div>
+
+        <div class="panel-card">
+          <h5><i class="material-icons cyan-text text-darken-3">school</i> Módulos de Capacitación y Canales</h5>
+          <div id="links-rapidos-inicio" style="display: flex; gap: 12px; flex-wrap: wrap;"></div>
+        </div>
+
+        <div class="panel-card" style="background: #fafafa; border: 1px dashed #cbd5e1;">
+          <h5><i class="material-icons red-text">bug_report</i> Panel Técnico de Pruebas</h5>
+          <button type="button" class="btn red darken-2 waves-effect waves-light" style="text-transform:none; border-radius:4px;" onclick="ejecutarDisparoAlertaTemperatura()">
+            <i class="material-icons left">volume_up</i> Probar Alerta y Voz Ahora
+          </button>
+        </div>
+      </div>
+
+      <div id="sec-temperatura" class="seccion-app col s12" style="display:none;">
+        <div class="panel-card">
+          <h5><i class="material-icons orange-text text-darken-4">ac_unit</i> Control de Temperatura Horario</h5>
+          <div class="card-panel orange lighten-5 black-text" style="border-radius:6px; box-shadow:none; border:1px solid #ffe0b2; margin-bottom: 25px;">
+            <strong>Servidor Externo:</strong> Realice la auditoría obligatoria en <a href="https://datasense.iot.ubidots.com/app/dashboards/65a163fee95efa0051a284a9/layers/6763334004cc67035c78305a?isRealTimeEnabled=true&amp;initialDate=1791360746899&amp;finalDate=1791447146899&amp;timeRange=now-24h%7Cnow&amp;true=0" target="_blank" rel="noopener noreferrer" class="blue-text text-darken-4" style="font-weight:600; text-decoration: underline;">DATASENSE <i class="material-icons" style="font-size:14px; vertical-align: middle;">open_in_new</i></a>.
+          </div>
+          <form id="form-temp">
+            <div class="row">
+              <div class="col s12 m6">
+                <label style="font-weight: 600; color: var(--text-dark);">Estado del Control</label>
+                <select id="temp-estado" class="browser-default" style="margin-top:6px;">
+                  <option value="CONTROLADO - NORMAL">CONTROLADO - NORMAL</option>
+                  <option value="CRÍTICO - REVISAR OBSERVACIÓN">CRÍTICO - NOVEDAD FUERA DE RANGO</option>
+                </select>
+              </div>
+              <div class="input-field col s12 m6" style="margin-top: 23px;">
+                <input type="text" id="inspeccion-observaciones">
+                <label for="inspeccion-observaciones">Observaciones Especiales</label>
+              </div>
+            </div>
+            <button type="button" class="btn green darken-3 waves-effect waves-light" onclick="registrarTemperatura()" style="width:100%; text-transform:none; border-radius:4px; height: 44px; font-weight: 600;">
+              <i class="material-icons left">save</i> Asentar Registro de Inspección
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div id="sec-credenciales" class="seccion-app col s12" style="display:none;">
+        <div class="panel-card">
+          <h5><i class="material-icons red-text text-darken-3">badge</i> Alertas de Vencimiento de Credenciales</h5>
+          <div id="tabla-credenciales-contenedor" class="responsive-table"></div>
+        </div>
+      </div>
+
+      <div id="sec-uniformes" class="seccion-app col s12" style="display:none;">
+        <div class="panel-card">
+          <h5><i class="material-icons green-text text-darken-3">checkroom</i> Registro de Talles y Uniformes</h5>
+          <form id="form-uniforme">
+            <div class="row">
+              <div class="input-field col s12 m4"><input type="text" id="uni-guardia"><label for="uni-guardia">Nombre del Guardia</label></div>
+              <div class="input-field col s6 m2"><input type="text" id="uni-camisa"><label for="uni-camisa">Camisa</label></div>
+              <div class="input-field col s6 m2"><input type="text" id="uni-campera"><label for="uni-campera">Campera</label></div>
+              <div class="input-field col s6 m2"><input type="text" id="uni-pantalon"><label for="uni-pantalon">Pantalón</label></div>
+              <div class="input-field col s6 m2"><input type="text" id="uni-zapatos"><label for="uni-zapatos">Zapatos</label></div>
+              <div class="input-field col s6 m6"><input type="text" id="uni-corbata"><label for="uni-corbata">Corbata</label></div>
+              <div class="input-field col s6 m6"><input type="text" id="uni-porta"><label for="uni-porta">Porta Credencial</label></div>
+            </div>
+            <button type="button" class="btn blue darken-4" style="text-transform:none; border-radius:4px;" onclick="guardarUniforme()">Enviar Registro de Equipamiento</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="sec-novedades" class="seccion-app col s12" style="display:none;">
+        <div class="panel-card">
+          <h5><i class="material-icons blue-text text-darken-3">forward_to_inbox</i> Envío Formal de Correo a Gerencia</h5>
+          <p style="color:#64748b; line-height:1.6;">El formulario se abre dentro del espacio de trabajo de Puesto Uno para conservar la sesión autorizada de Google.</p>
+          <iframe
+            title="Envío Formal de Correo a Gerencia"
+            src="https://script.google.com/macros/s/AKfycbwVOLnO9Ai4Vj95QUku5rg3rvYDXHi3h1sU-CSYjzzeIHQU6DvMXUjr9WycukcI02-v/exec?vista=correo"
+            loading="lazy"
+            style="display:block;width:100%;min-height:900px;border:0;border-radius:8px;background:#f1f5f9;">
+          </iframe>
+        </div>
+      </div>
+
+      <div id="sec-utiles" class="seccion-app col s12" style="display:none;">
+        <div class="panel-card">
+          <h5><i class="material-icons brown-text text-darken-3">shopping_bag</i> Solicitud de Útiles e Insumos</h5>
+          <form id="form-utiles">
+            <div class="row">
+              <div class="input-field col s12 m4"><input type="text" id="ut-remito"><label for="ut-remito">N° Remito</label></div>
+              <div class="input-field col s12 m4"><input type="text" id="ut-solicitante"><label for="ut-solicitante">Guardia Solicitante</label></div>
+              <div class="input-field col s12 m4"><input type="text" id="ut-responsable"><label for="ut-responsable">Responsable de Entrega</label></div>
+              <div class="input-field col s12"><textarea id="ut-detalle" class="materialize-textarea"></textarea><label for="ut-detalle">Insumos Requeridos</label></div>
+            </div>
+            <button type="button" class="btn brown darken-3" style="text-transform:none; border-radius:4px;" onclick="guardarUtiles()">Procesar Pedido</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="sec-capacitaciones" class="seccion-app col s12" style="display:none;">
+        <div class="panel-card">
+          <h5><i class="material-icons purple-text text-darken-3">school</i> Portal de Capacitación Securion</h5>
+          <div class="portal-capacitaciones-frame" role="region" aria-label="Acceso al portal de capacitación Securion">
+            <div class="portal-capacitaciones-message">
+              <h6>Portal protegido de Securion</h6>
+              <p>Por seguridad, el portal no permite mostrarse dentro de Puesto Uno. Abrilo en una pestaña nueva o escaneá el código QR para ingresar desde el celular.</p>
+              <a class="btn blue darken-3" href="https://securion.ejecutiva.com/login/?next=/escritorio/portal/portal-general/" target="_blank" rel="noopener noreferrer" style="text-transform:none;">Abrir portal ↗</a>
+            </div>
+            <div class="portal-capacitaciones-qr">
+              <strong>Escaneá para abrir desde el celular</strong>
+              <div id="qr-portal-capacitaciones" class="portal-capacitaciones-qr-code" aria-label="Código QR del portal Securion"></div>
+              <a class="portal-capacitaciones-open" href="https://securion.ejecutiva.com/login/?next=/escritorio/portal/portal-general/" target="_blank" rel="noopener noreferrer">Abrir en otra pestaña ↗</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="sec-tareas-tecnicas" class="seccion-app col s12" style="display:none;">
+        <div class="panel-card">
+          <h5><i class="material-icons green-text text-darken-3">construction</i> Registro de Tareas Técnicas</h5>
+          <form id="form-tareas">
+            <div class="row" style="margin-bottom: 0;">
+              <div class="input-field col s12 m3"><input type="text" id="tt-orden" required><label for="tt-orden">Nro. de Orden</label></div>
+              <div class="input-field col s12 m3"><input type="text" id="tt-fecha" placeholder="DD/MM/AAAA"><label for="tt-fecha">Fecha de Visita</label></div>
+              <div class="input-field col s12 m3"><input type="text" id="tt-hora" placeholder="HH:MM"><label for="tt-hora">Hora de Llegada</label></div>
+              <div class="input-field col s12 m3"><input type="text" id="tt-abonado"><label for="tt-abonado">Nro. de Abonado</label></div>
+            </div>
+            <div class="row" style="margin-bottom: 0;">
+              <div class="input-field col s12 m4"><input type="text" id="tt-direccion"><label for="tt-direccion">Dirección</label></div>
+              <div class="input-field col s12 m4"><input type="text" id="tt-empresa"><label for="tt-empresa">Nombre de la Empresa</label></div>
+              <div class="input-field col s12 m4"><input type="text" id="tt-tecnicos"><label for="tt-tecnicos">Técnico(s) Asignado(s)</label></div>
+            </div>
+            <div class="row" style="margin-bottom: 0;">
+              <div class="input-field col s12 m6"><input type="text" id="tt-trabajo"><label for="tt-trabajo">Trabajo Realizado</label></div>
+              <div class="input-field col s12 m6"><input type="text" id="tt-obs"><label for="tt-obs">Observaciones / Hallazgos</label></div>
+            </div>
+            <div class="row">
+              <div class="col s12 m4">
+                <label style="font-weight: 600; color:var(--text-dark)">¿Se solucionó el problema?</label>
+                <select class="browser-default" id="tt-solucionado" style="margin-top: 6px;">
+                  <option value="" disabled selected>Seleccione opción</option>
+                  <option value="SI">SI ✔️</option>
+                  <option value="NO">NO ❌</option>
+                </select>
+              </div>
+              <div class="input-field col s12 m8" style="margin-top: 23px;">
+                <input type="text" id="tt-foto" placeholder="Pegar enlace URL de Google Drive">
+                <label for="tt-foto">Enlace de Foto Comprobante (Opcional)</label>
+              </div>
+            </div>
+            <button type="button" class="btn green darken-2" style="width: 100%; font-weight: bold; height: 44px; text-transform:none; border-radius:4px;" onclick="guardarTareaTecnica()">
+              Registrar Tarea y Volcar a Planilla
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div id="sec-admin" class="seccion-app col s12" style="display:none;">
+        <div class="panel-card">
+          <h5><i class="material-icons red-text text-darken-4">lock_clock</i> Matriz de Edición de Planificación</h5>
+          <div id="tabla-admin-placeholder" class="responsive-table"></div>
+          <br>
+          <button class="btn blue darken-4" style="text-transform:none; border-radius:4px;" onclick="guardarCambiosCronograma()"><i class="material-icons left">cloud_upload</i> Guardar Cambios en Servidor</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="modal-alerta-temp" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.8); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
+    <div class="modal-alerta-style">
+      <i class="material-icons red-text" style="font-size: 54px; margin-bottom: 12px;">gpp_maybe</i>
+      <h5 style="margin: 0 0 10px 0; font-weight: 700; color: #0f172a;">ALERTA OPERATIVA</h5>
+      <p style="font-size: 1.05rem; color: #475569; margin-bottom: 25px;">REALICE EL CONTROL DE TEMPERATURA OBLIGATORIO DEL SERVIDOR</p>
+      <button type="button" class="btn red darken-2 white-text" onclick="cerrarAlertaTemp()" style="font-weight: 600; width: 100%; text-transform:none; border-radius:4px; height: 44px;">
+        Cargar Registro Ahora
+      </button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <script>
+    const CONFIG_API_URL = "https://script.google.com/macros/s/AKfycbwVOLnO9Ai4Vj95QUku5rg3rvYDXHi3h1sU-CSYjzzeIHQU6DvMXUjr9WycukcI02-v/exec";
+    const PORTAL_CAPACITACIONES_URL = "https://securion.ejecutiva.com/login/?next=/escritorio/portal/portal-general/";
+    var matrizCronogramaGlobal = [];
+
+    const CAPACITACIONES_ESTATICAS = [
+      { nombre: "Portal de Capacitación Securion", link: PORTAL_CAPACITACIONES_URL }
+    ];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      M.AutoInit();
+      inicializarBucleAlertaHoraria();
+      new QRCode(document.getElementById('qr-portal-capacitaciones'), {
+        text: PORTAL_CAPACITACIONES_URL,
+        width: 120,
+        height: 120,
+        colorDark: "#0f172a",
+        colorLight: "#ffffff"
+      });
+      renderizarCapacitacionesFijas();
+      const seccionInicial = new URLSearchParams(window.location.search).get('seccion');
+      const seccionesDisponibles = ['inicio', 'temperatura', 'credenciales', 'uniformes', 'novedades', 'utiles', 'capacitaciones', 'tareas-tecnicas', 'admin'];
+      if (seccionInicial === 'admin') {
+        abrirEdicionCronograma();
+      } else if (seccionInicial && seccionesDisponibles.includes(seccionInicial)) {
+        cambiarSeccion(seccionInicial);
+      }
+      cargarDatosDesdeServidor();
+    });
+
+    function cambiarSeccion(idSeccion) {
+      document.querySelectorAll('.seccion-app').forEach(sec => sec.style.display = 'none');
+      const target = document.getElementById('sec-' + idSeccion);
+      if(target) target.style.display = 'block';
+      
+      document.querySelectorAll('.sidenav li').forEach(li => li.classList.remove('active'));
+      const menuEl = document.getElementById('menu-' + idSeccion);
+      if(menuEl) menuEl.classList.add('active');
+    }
+
+    function inicializarBucleAlertaHoraria() {
+      if (window.self !== window.top) return;
+      const unaHora = 3600000;
+      setInterval(() => {
+        dispararAlertaVisualYVoz();
+      }, unaHora);
+    }
+
+    function dispararAlertaVisualYVoz() {
+      const modalAlerta = document.getElementById('modal-alerta-temp');
+      if (modalAlerta) modalAlerta.style.display = 'flex';
+
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        let discurso = new SpeechSynthesisUtterance("Alerta operativa: REALICE EL CONTROL DE TEMPERATURA OBLIGATORIO DEL SERVIDOR");
+        discurso.lang = 'es-ES';
+        discurso.rate = 0.9;
+        window.speechSynthesis.speak(discurso);
+      }
+    }
+
+    function cerrarAlertaTemp() {
+      document.getElementById('modal-alerta-temp').style.display = 'none';
+      cambiarSeccion('temperatura');
+    }
+
+    function procesarInformacionTurno(valorOriginal) {
+      if (!valorOriginal) return { html: '', clase: '' };
+      let texto = valorOriginal.toString().trim().toUpperCase();
+      
+      if (texto === 'FRANCO' || texto.includes('FRANCO')) {
+        return { html: `FRANCO`, clase: 't-franco' };
+      }
+      if (texto === 'RETEN' || texto.includes('RETEN')) {
+        return { html: `RETEN`, clase: 't-reten' };
+      }
+      
+      if (texto.includes('/')) {
+        let partes = texto.split('/');
+        let horaInicio = parseFloat(partes[0].replace(',', '.'));
+        if (horaInicio >= 19) return { html: `N (${texto})`, clase: 't-n' };
+        if (horaInicio >= 12.5) return { html: `T (${texto})`, clase: 't-t' };
+        if (horaInicio >= 5 && horaInicio < 12.5) return { html: `M (${texto})`, clase: 't-m' };
+      }
+      
+      if (texto === 'M') return { html: 'M', clase: 't-m' };
+      if (texto === 'T') return { html: 'T', clase: 't-t' };
+      if (texto === 'N') return { html: 'N', clase: 't-n' };
+      return { html: texto, clase: '' };
+    }
+
+    function cargarDatosDesdeServidor() {
+      console.log("Sincronizando Cronograma...");
+      llamarApiSheets('CRONOGRAMA', 'LEER', null, function(datos) {
+        if(!datos || datos.length === 0) return;
+        
+        let html = '<table class="custom-table"><thead><tr>';
+        datos[0].forEach(col => html += `<th>${col}</th>`);
+        html += '</tr></thead><tbody>';
+        let guardiasAsignadosHtml = '';
+
+        for(let f = 1; f < datos.length; f++) {
+          let filaActual = datos[f];
+          if (!filaActual || filaActual[0] === "") continue;
+
+          if (filaActual[0].toString().toUpperCase().includes("TOTAL")) {
+            html += `<tr style="background:#f1f5f9; font-weight:700;"><td style="text-align:left; color:#1e293b;">${filaActual[0]}</td>`;
+            for(let c = 1; c < filaActual.length; c++) {
+              html += `<td style="color:#22c55e; text-align:center;">${filaActual[c] || ''}</td>`;
+            }
+            html += '</tr>';
+            continue;
+          }
+
+          html += `<tr><td><strong>${filaActual[0]}</strong></td>`;
+          for(let c = 1; c < filaActual.length; c++) {
+            let celdaValor = filaActual[c] !== undefined ? filaActual[c].toString() : '';
+            if(c < 8 && celdaValor !== '') { 
+              let estructTurno = procesarInformacionTurno(celdaValor);
+              html += `<td><span class="block-turno ${estructTurno.clase}">${estructTurno.html}</span></td>`;
+            } else {
+              html += `<td>${celdaValor}</td>`;
+            }
+          }
+          html += '</tr>';
+
+          let nombreGuardiaOriginal = filaActual[0].toString().trim();
+          if(nombreGuardiaOriginal !== "" && !nombreGuardiaOriginal.toUpperCase().includes("TOTAL")) {
+            guardiasAsignadosHtml += `
+              <div class="chip-integracion">
+                <i class="material-icons green-text" style="font-size:16px; vertical-align:middle;">check_circle</i>
+                <span style="font-weight:600; color:var(--text-dark);">${nombreGuardiaOriginal}</span>
+              </div>`;
+          }
+        }
+        html += '</tbody></table>';
+        document.getElementById('cronograma-contenedor-grafico').innerHTML = html;
+        document.getElementById('integracion-personal-contenedor').innerHTML = guardiasAsignadosHtml;
+      });
+
+      console.log("Sincronizando Credenciales...");
+      llamarApiSheets('CREDENCIALES', 'LEER', null, function(datos) {
+        if(!datos || datos.length <= 1) return;
+        let html = '<table class="custom-table"><thead><tr><th>Personal</th><th>Vencimiento</th><th>Faltan</th><th>Acción</th></tr></thead><tbody>';
+        let credencialesParaAlertas = [];
+        for(let f=1; f<datos.length; f++) {
+          let dias = parseInt(datos[f][3]) || 0;
+          let statusClass = dias <= 30 ? 'status-error' : 'status-ok';
+          let label = dias <= 30 ? 'RENOVAR YA' : 'VIGENTE';
+          html += `<tr><td><strong>${datos[f][0]}</strong></td><td>${datos[f][2]}</td><td>${dias} días</td><td><span class="badge-status ${statusClass}">${label}</span></td></tr>`;
+          if ([40, 30, 15, 1].includes(dias)) {
+            credencialesParaAlertas.push({ nombre: datos[f][0], dias: dias, fecha: datos[f][2] });
+          }
+        }
+        html += '</tbody></table>';
+        document.getElementById('tabla-credenciales-contenedor').innerHTML = html;
+        procesarAlertasCredenciales(credencialesParaAlertas);
+      });
+
+    }
+
+    function procesarAlertasCredenciales(items) {
+      if (!items || items.length === 0) return;
+      if (!('Notification' in window)) return;
+
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().then(function(permission) {
+          if (permission === 'granted') {
+            procesarAlertasCredenciales(items);
+          }
+        });
+        return;
+      }
+      if (Notification.permission !== 'granted') return;
+
+      let enviadasHoy = {};
+      try {
+        enviadasHoy = JSON.parse(localStorage.getItem('alertasCredencialesEnviadas') || '{}');
+      } catch (e) {
+        enviadasHoy = {};
+      }
+      let hoy = new Date().toISOString().slice(0, 10);
+
+      items.forEach(function(item) {
+        let key = `${item.nombre}|${item.dias}|${item.fecha}`;
+        if (enviadasHoy[key] === hoy) return;
+        enviadasHoy[key] = hoy;
+        let titulo = `Alerta de credencial ${item.dias} día${item.dias === 1 ? '' : 's'}`;
+        let mensaje = `${item.nombre} vence el ${item.fecha}.`;
+        enviarNotificacionPush(titulo, mensaje);
+      });
+
+      try {
+        localStorage.setItem('alertasCredencialesEnviadas', JSON.stringify(enviadasHoy));
+      } catch (e) {}
+    }
+
+    function enviarNotificacionPush(titulo, mensaje) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      new Notification(titulo, {
+        body: mensaje,
+        silent: false
+      });
+    }
+
+    function renderizarCapacitacionesFijas() {
+      const contenedorRapido = document.getElementById('links-rapidos-inicio');
+      if(!contenedorRapido) return;
+      
+      contenedorRapido.innerHTML = '';
+
+      CAPACITACIONES_ESTATICAS.forEach((cap) => {
+        contenedorRapido.innerHTML += `
+          <a href="${cap.link}" target="_blank" class="btn btn-small blue darken-4" style="text-transform:none; font-weight:600; border-radius:4px;">
+            <i class="material-icons left">launch</i> ${cap.nombre}
+          </a>`;
+      });
+    }
+
+    function registrarTemperatura() {
+      M.toast({html: 'Enviando control de temperatura...', classes: 'blue'});
+      let fechaHoraActual = new Date().toLocaleString();
+      let estado = document.getElementById('temp-estado').value;
+      let observaciones = document.getElementById('inspeccion-observaciones').value;
+
+      let fila = [fechaHoraActual, estado, observaciones];
+      llamarApiSheets('CONTROL DE TEMPERATURAS', 'ESCRIBIR', fila, function() {
+        M.toast({html: '✓ Registro enviado', classes: 'green'});
+        document.getElementById('inspeccion-observaciones').value = '';
+        cambiarSeccion('inicio');
+      });
+    }
+
+    function guardarUniforme() {
+      let fila = [document.getElementById('uni-guardia').value, document.getElementById('uni-camisa').value, document.getElementById('uni-campera').value, document.getElementById('uni-pantalon').value, document.getElementById('uni-zapatos').value, document.getElementById('uni-corbata').value, document.getElementById('uni-porta').value];
+      llamarApiSheets('SOLICITUD DE UNIFORMES', 'ESCRIBIR', fila, () => { 
+        M.toast({html: '✓ Uniforme Registrado', classes: 'green'}); 
+        document.getElementById('form-uniforme').reset();
+        cambiarSeccion('inicio');
+      });
+    }
+
+    function guardarUtiles() {
+      let fila = [new Date().toLocaleString(), document.getElementById('ut-remito').value, document.getElementById('ut-solicitante').value, document.getElementById('ut-responsable').value, document.getElementById('ut-detalle').value];
+      llamarApiSheets('PEDIDO DE UTILES', 'ESCRIBIR', fila, () => { 
+        M.toast({html: '✓ Pedido de útiles guardado', classes: 'green'}); 
+        document.getElementById('form-utiles').reset();
+        cambiarSeccion('inicio');
+      });
+    }
+
+    function guardarTareaTecnica() {
+      let nroOrden    = document.getElementById('tt-orden').value;
+      let fechaVisita = document.getElementById('tt-fecha').value;
+      let horaLlegada = document.getElementById('tt-hora').value;
+      let nroAbonado  = document.getElementById('tt-abonado').value;
+      let direccion   = document.getElementById('tt-direccion').value;
+      let empresa     = document.getElementById('tt-empresa').value;
+      let tecnicos    = document.getElementById('tt-tecnicos').value;
+      let trabajo     = document.getElementById('tt-trabajo').value;
+      let obs         = document.getElementById('tt-obs').value;
+      let solucionado = document.getElementById('tt-solucionado').value;
+      let fotoUrl     = document.getElementById('tt-foto').value || "";
+
+      if (!nroOrden) { 
+        M.toast({html: '❌ El número de orden es obligatorio', classes: 'red'}); 
+        return; 
+      }
+
+      let fila = [nroOrden, fechaVisita, horaLlegada, nroAbonado, direccion, empresa, tecnicos, trabajo, obs, solucionado, fotoUrl];
+
+      llamarApiSheets('TAREAS TECNICAS', 'ESCRIBIR', fila, function() {
+        M.toast({html: '✓ Tarea Técnica registrada con éxito', classes: 'green'});
+        document.getElementById('form-tareas').reset();
+        cambiarSeccion('inicio');
+      });
+    }
+
+    function abrirEdicionCronograma() {
+      cambiarSeccion('admin');
+      const opcionesDesplegable = ["", "7/19", "19/7", "13.5/23.5", "FRANCO", "RETEN"];
+        
+      llamarApiSheets('CRONOGRAMA', 'LEER', null, function(datos) {
+          matrizCronogramaGlobal = datos;
+          let html = '<table style="width:100%; border-collapse: collapse; background: #ffffff;">';
+          
+          for(let f = 0; f < datos.length; f++) {
+            let filaActual = datos[f];
+            let esFilaHorarioEditable = f >= 2 && ((f - 2) % 3 === 0);
+            html += '<tr style="border-bottom: 1px solid #cbd5e1;">';
+            
+            for(let c = 0; c < filaActual.length; c++) {
+              let esFilaDiasHeader = (f === 0);
+              let esColumnaNombre = (c === 0);
+              let fondoCelda = (esFilaDiasHeader || esColumnaNombre) ? '#f8fafc' : '#ffffff';
+              
+              html += `<td style="padding: 6px; background: ${fondoCelda}; border: 1px solid #cbd5e1; min-width: 100px;">`;
+              
+              if (esFilaDiasHeader) {
+                html += `<input type="text" id="cell-${f}-${c}" value="${filaActual[c] || ''}" readonly style="margin:0; font-weight:bold; border:none; background:transparent; width:100%; text-align:center; font-size:0.85rem;">`;
+              } else if (esColumnaNombre) {
+                if (esFilaHorarioEditable) {
+                  html += `<input type="text" id="cell-${f}-${c}" value="${filaActual[c] || ''}" style="margin:0; font-weight:bold; border:1px solid #cbd5e1; border-radius:4px; width:100%; padding-left:6px; height:2rem; font-size:0.85rem;">`;
+                } else {
+                  html += `<input type="text" id="cell-${f}-${c}" value="${filaActual[c] || ''}" readonly style="margin:0; border:none; background:#f8fafc; width:100%; text-align:center; color:#94a3b8; font-size:0.85rem;">`;
+                }
+              } else {
+                let valorActual = (filaActual[c] || '').toString().trim();
+                if (esFilaHorarioEditable) {
+                  html += `<select id="cell-${f}-${c}" class="browser-default" style="margin:0; height:2rem; border:1px solid #cbd5e1; border-radius:4px; width:100%; font-weight:600; color:#1e40af; padding:2px; font-size:0.85rem;">`;
+                  let opcionesCelda = [...opcionesDesplegable];
+                  if (valorActual !== "" && !opcionesCelda.includes(valorActual)) opcionesCelda.push(valorActual);
+                  
+                  opcionesCelda.forEach(opt => {
+                    let seleccionado = (opt === valorActual) ? 'selected' : '';
+                    html += `<option value="${opt}" ${seleccionado}>${opt === "" ? "- Vacío -" : opt}</option>`;
+                  });
+                  html += `</select>`;
+                } else {
+                  html += `<input type="text" id="cell-${f}-${c}" value="${valorActual}" readonly style="margin:0; border:none; background:#f8fafc; width:100%; text-align:center; font-weight:bold; color:#94a3b8; font-size:0.85rem;">`;
+                }
+              }
+              html += `</td>`;
+            }
+            html += '</tr>';
+          }
+          html += '</table>';
+          document.getElementById('tabla-admin-placeholder').innerHTML = html;
+      });
+    }
+
+    function guardarCambiosCronograma() {
+      for(let f=0; f<matrizCronogramaGlobal.length; f++) {
+        for(let c=0; c<matrizCronogramaGlobal[f].length; c++) {
+          let inp = document.getElementById(`cell-${f}-${c}`);
+          if(inp) matrizCronogramaGlobal[f][c] = inp.value;
+        }
+      }
+      llamarApiSheets('CRONOGRAMA', 'ACTUALIZAR_MATRIZ', matrizCronogramaGlobal, function() {
+        M.toast({html: '✓ Servidor Actualizado Exitosamente', classes: 'green'});
+        cargarDatosDesdeServidor();
+        cambiarSeccion('inicio');
+      });
+    }
+
+    function llamarApiSheets(pestana, accion, datos, callback, onError) {
+      if (!CONFIG_API_URL) {
+        const mensaje = "Backend propio pendiente: configurá la URL de la implementación de Puesto Uno.";
+        console.error(mensaje, { pestana: pestana, accion: accion });
+        const estadoBackend = document.getElementById('estado-backend');
+        if (estadoBackend) estadoBackend.textContent = mensaje;
+        if (window.M && typeof M.toast === 'function') {
+          M.toast({html: mensaje, classes: 'red'});
+        }
+        return;
+      }
+
+      if (window.google && google.script && google.script.run) {
+        let serverCall = google.script.run
+          .withSuccessHandler(resultado => {
+            if (callback) callback(resultado);
+          })
+          .withFailureHandler(err => {
+            mostrarErrorApiSheets(pestana, accion, err, onError);
+          });
+
+        if (accion === 'LEER') {
+          serverCall.leerDatosParaInterfaz(pestana);
+        } else {
+          serverCall.escribirDatosDesdeInterfaz(pestana, accion, datos);
+        }
+        return;
+      }
+
+      let url = `${CONFIG_API_URL}?pestaña=${encodeURIComponent(pestana)}&accion=${accion}`;
+      let opciones = { method: 'GET' };
+
+      if (accion === 'ESCRIBIR' || accion === 'ACTUALIZAR_MATRIZ' || accion === 'ENVIAR_CORREO_GERENCIA') {
+        opciones = {
+          method: 'POST',
+          body: JSON.stringify({ datos: datos })
+        };
+      }
+
+      fetch(url, opciones)
+        .then(res => {
+          if (!res.ok) throw new Error(`El servidor respondió HTTP ${res.status}`);
+          return res.json();
+        })
+        .then(resultado => {
+          if (resultado && !Array.isArray(resultado) && (resultado.ok === false || resultado.error === true)) {
+            const mensajeError = typeof resultado.error === 'string'
+              ? resultado.error
+              : resultado.mensaje || 'El servidor rechazó la operación.';
+            throw new Error(mensajeError);
+          }
+          const estadoBackend = document.getElementById('estado-backend');
+          if (estadoBackend) estadoBackend.hidden = true;
+          if(callback) callback(resultado);
+        })
+        .catch(err => {
+          mostrarErrorApiSheets(pestana, accion, err, onError);
+        });
+    }
+
+    function mostrarErrorApiSheets(pestana, accion, err, onError) {
+      console.error("Error en la conexión con el backend de Puesto Uno:", err);
+      const estadoBackend = document.getElementById('estado-backend');
+      if (estadoBackend) {
+        estadoBackend.hidden = false;
+        estadoBackend.textContent = `No se pudo completar ${accion} en ${pestana}: ${err.message}`;
+      }
+      if (window.M && typeof M.toast === 'function') {
+        M.toast({html: 'Error de conexión con el servidor', classes: 'red'});
+      }
+      if (onError) onError(err);
+    }
+
+    function ejecutarDisparoAlertaTemperatura() {
+      dispararAlertaVisualYVoz();
+    }
+  </script>
+</body>
+</html>
